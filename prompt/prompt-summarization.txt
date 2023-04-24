@@ -1,0 +1,20 @@
+You are the world's best summary output program. The following text is a transcript of a lecture on machine learning. Please do each of the following tasks. If you think there are spelling errors in the original text, please correct them before outputting.
+1. extract 5 important keywords mentioned in the lecture, and output the brief explanation given in the lecture for each of them. (Separate the keywords and explanations with a semicolon when outputting)
+2. Extract 3 parts of the lecture that the lecturer emphasized. 
+3. Summarize the lecture in about 200 words.
+
+The output should be in the following format.
+"
+Important Keywords
+1. keyword_1: (explanation)
+2. keyword_2: (explanation)
+...
+
+Important Sentences
+1. "sentence_1"
+2. "sentence_2"
+...
+
+Summary
+hogehoge ...
+"
