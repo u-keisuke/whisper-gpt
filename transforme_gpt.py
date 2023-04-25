@@ -25,6 +25,16 @@ class TextTransformer:
             os.makedirs(self.output_dir)
         if not os.path.exists(os.path.join(self.output_dir, "log")):
             os.makedirs(os.path.join(self.output_dir, "log"))
+    
+    def transform_text(self, text):
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": self.prompt_text},
+                {"role": "user", "content": text},
+            ]
+        )
+        return response
 
     def transform_file(self, input_file_name):
         input_file_path = os.path.join(self.input_dir, input_file_name)
@@ -39,16 +49,20 @@ class TextTransformer:
         chunks = self.split_text_into_chunks(text)
 
         for i, chunk in enumerate(chunks):
-            print(f"{i+1} / {len(chunks)}")
+            print(f"{i+1} / {len(chunks)}:", end=" ")
 
-            response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {"role": "system", "content": self.prompt_text},
-                    {"role": "user", "content": chunk},
-                ]
-            )
+            response = self.transform_text(chunk)
 
+            try:
+                prompt_tokens = response["usage"]["prompt_tokens"]
+                completion_tokens = response["usage"]["completion_tokens"]
+            except KeyError:
+                prompt_tokens = "N/A"
+                completion_tokens = "N/A"
+            
+            print(f"tokens: ({prompt_tokens=}, {completion_tokens=})")
+
+            self.save_result(output_file_path, "# Chunk " + str(i+1) + " / " + str(len(chunks)))
             self.save_result(output_file_path, response)
             self.save_log(log_file_path, response)
 
@@ -61,8 +75,15 @@ class TextTransformer:
         return chunks
 
     def save_result(self, output_file_path, response):
+        if type(response) == openai.openai_object.OpenAIObject:
+            response_text = response["choices"][0]["message"]["content"] + "\n"
+        elif type(response) == str:
+            response_text = response
+        else:
+            print("ERROR: response is not a dict or string")
+            sys.exit(1)
         with open(output_file_path, "a") as f:
-            f.write(response["choices"][0]["message"]["content"]+"\n\n\n")
+            f.write(response_text + "\n\n")
 
     def save_log(self, log_file_path, response):
         with open(log_file_path, "a") as f:
