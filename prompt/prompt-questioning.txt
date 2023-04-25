@@ -1,0 +1,9 @@
+The following text is a transcript of a lecture on machine learning. Please Read this passage and list 5 questions that would be difficult to answer. If you think there are spelling errors in the original text, please correct them before outputting.
+
+The output should be in the following format.
+"
+[Questions]
+1. 'question_1'
+2. 'question_2'
+...
+"
