@@ -1,4 +1,5 @@
 video-audio
 transcript
-summary
+output
+output/log
 prompt
