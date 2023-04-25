@@ -5,16 +5,16 @@ You are the world's best summary output program. The following text is a transcr
 
 The output should be in the following format.
 "
-[Important Keywords]
+## Important Keywords
 1. 'keyword_1': 'explanation_1'
 2. 'keyword_2': 'explanation_2'
 ...
 
-[Important Sentences]
+## Important Sentences
 1. 'sentence_1'
 2. 'sentence_2'
 ...
 
-[Summary]
+## Summary
 'summary text'
 "
