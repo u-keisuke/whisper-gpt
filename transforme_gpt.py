@@ -2,13 +2,15 @@ import argparse
 import json
 import os
 import sys
+
 import openai
 
 
 class TextTransformer:
-    def __init__(self, input_dir, output_dir, prompt_file):
+    def __init__(self, input_dir, output_dir, prompt_file, log_base_dir):
         self.input_dir = input_dir
         self.output_dir = output_dir
+        self.log_dir = os.path.join(log_base_dir, "gpt")
         self.prompt_file = prompt_file
         self.prompt_text = self.read_prompt_file()
         prompt_file_name = os.path.splitext(os.path.basename(prompt_file))[0]
@@ -23,12 +25,13 @@ class TextTransformer:
     def setup_output_directories(self):
         if not os.path.exists(self.output_dir):
             os.makedirs(self.output_dir)
-        if not os.path.exists(os.path.join(self.output_dir, "log")):
-            os.makedirs(os.path.join(self.output_dir, "log"))
+        if not os.path.exists(self.log_dir):
+            os.makedirs(self.log_dir)
     
     def transform_text(self, text):
         response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+            #model="gpt-3.5-turbo",
+            model="gpt-4",
             messages=[
                 {"role": "system", "content": self.prompt_text},
                 {"role": "user", "content": text},
@@ -36,15 +39,7 @@ class TextTransformer:
         )
         return response
 
-    def transform_file(self, input_file_name):
-        input_file_path = os.path.join(self.input_dir, input_file_name)
-        output_file_name = input_file_name.replace("_transcript", f"_{self.prompt_name}")
-        output_file_path = os.path.join(self.output_dir, output_file_name)
-        log_file_name = input_file_name.replace("_transcript.txt", f"_{self.prompt_name}_log.json")
-        log_file_path = os.path.join(self.output_dir, "log", log_file_name)
-
-        print(f"{input_file_name} -> {output_file_name}")
-
+    def transform_file(self, input_file_path, output_file_path, log_file_path):
         text = open(input_file_path, "r").read()
         chunks = self.split_text_into_chunks(text)
 
@@ -65,6 +60,8 @@ class TextTransformer:
             self.save_result(output_file_path, "# Chunk " + str(i+1) + " / " + str(len(chunks)))
             self.save_result(output_file_path, response)
             self.save_log(log_file_path, response)
+        
+        print()
 
     def split_text_into_chunks(self, text, chunk_size=2400):
         chunks = []
@@ -92,7 +89,20 @@ class TextTransformer:
 
     def transform_all_files(self):
         for input_file_name in sorted(os.listdir(self.input_dir)):
-            self.transform_file(input_file_name)
+            # exclude system files
+            if input_file_name.startswith("."):
+                continue
+                
+            input_file_path = os.path.join(self.input_dir, input_file_name)
+
+            output_file_name = input_file_name.replace("_transcript", f"_{self.prompt_name}")
+            output_file_path = os.path.join(self.output_dir, output_file_name)
+
+            log_file_name = input_file_name.replace("_transcript.txt", f"_{self.prompt_name}_log.jsonl")
+            log_file_path = os.path.join(self.log_dir, log_file_name)
+
+            print(f"{input_file_name} -> {output_file_name}")
+            self.transform_file(input_file_path, output_file_path, log_file_path)
 
 
 def main():
@@ -103,9 +113,10 @@ def main():
     parser.add_argument("input_dir", type=str, help="Input directory")
     parser.add_argument("output_dir", type=str, help="Output directory")
     parser.add_argument("prompt_file", type=str, help="Prompt file path")
+    parser.add_argument("--log_dir", type=str, default="log", help="Log directory")
     args = parser.parse_args()
 
-    texttransformer = TextTransformer(args.input_dir, args.output_dir, args.prompt_file)
+    texttransformer = TextTransformer(args.input_dir, args.output_dir, args.prompt_file, args.log_dir)
     texttransformer.transform_all_files()
 
 

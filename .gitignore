@@ -1,6 +1,10 @@
-output/*
-transcript/*
-video-audio/*
+output/*.txt
+transcript/*.txt
+video-audio/*.mp4
+video-audio/*.mp3
+log/*/*.jsonl
+
+.DS_Store
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
