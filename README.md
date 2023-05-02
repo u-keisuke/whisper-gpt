@@ -1,5 +1,11 @@
 # whisper-gpt
 
+## whisper (transcription)
+video or audio ```(/video-audio)``` -> text ```(/transcript)```
+
+## GPT (text transformation)
+text ```(/transcript)``` -> text ```(/output)```
+
 ## prompt
 
 ### prompt-summarization.txt
