@@ -7,10 +7,11 @@ import openai
 
 
 class TextTransformer:
-    def __init__(self, input_dir, output_dir, prompt_file, log_base_dir):
+    def __init__(self, input_dir, output_dir, prompt_file, model, log_base_dir):
         self.input_dir = input_dir
         self.output_dir = output_dir
         self.log_dir = os.path.join(log_base_dir, "gpt")
+        self.model = model
         self.prompt_file = prompt_file
         self.prompt_text = self.read_prompt_file()
         prompt_file_name = os.path.splitext(os.path.basename(prompt_file))[0]
@@ -30,8 +31,7 @@ class TextTransformer:
     
     def transform_text(self, text):
         response = openai.ChatCompletion.create(
-            #model="gpt-3.5-turbo",
-            model="gpt-4",
+            model=self.model, 
             messages=[
                 {"role": "system", "content": self.prompt_text},
                 {"role": "user", "content": text},
@@ -113,10 +113,11 @@ def main():
     parser.add_argument("input_dir", type=str, help="Input directory")
     parser.add_argument("output_dir", type=str, help="Output directory")
     parser.add_argument("prompt_file", type=str, help="Prompt file path")
+    parser.add_argument("model", type=str, default="gpt-3.5-turbo", choices=["gpt-3.5-turbo", "gpt-4"], help="Model name")
     parser.add_argument("--log_dir", type=str, default="log", help="Log directory")
     args = parser.parse_args()
 
-    texttransformer = TextTransformer(args.input_dir, args.output_dir, args.prompt_file, args.log_dir)
+    texttransformer = TextTransformer(args.input_dir, args.output_dir, args.prompt_file, args.model, args.log_dir)
     texttransformer.transform_all_files()
 
 
