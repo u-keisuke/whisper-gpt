@@ -1,0 +1,11 @@
+[project]
+name = "whisper-gpt"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "openai>=1.44.1",
+    "pydub>=0.25.1",
+    "tqdm>=4.66.5",
+]

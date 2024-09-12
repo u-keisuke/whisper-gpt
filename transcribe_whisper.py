@@ -3,10 +3,13 @@ import json
 import os
 import sys
 
-import openai
+from openai import OpenAI
 from pydub import AudioSegment
 from tqdm import tqdm
 
+client = OpenAI(
+    api_key=os.environ.get("OPENAI_API_KEY"),
+)
 
 class AudioTranscriber:
     def __init__(self, input_dir, output_dir, log_base_dir, language_code="en"):
@@ -23,8 +26,11 @@ class AudioTranscriber:
             os.makedirs(self.log_dir)
 
     def transcribe_audio(self, audio_data):
-        response = openai.Audio.transcribe("whisper-1", audio_data, language=self.language_code)
-        return response
+        transcription = client.audio.transcriptions.create(
+            model="whisper-1", 
+            file=audio_data, 
+        )
+        return transcription
 
     def transcribe_file(self, input_file_path, output_file_path, log_file_path):
         sound = self.load_audio_file(input_file_path)
@@ -38,7 +44,7 @@ class AudioTranscriber:
             audio_data.close()
 
             self.save_result(output_file_path, response.text)
-            self.save_log(log_file_path, response)
+            #self.save_log(log_file_path, response)
             os.remove(chunk_file)
 
         print()
@@ -49,7 +55,7 @@ class AudioTranscriber:
         elif input_file_path.endswith(".mp4"):
             return AudioSegment.from_file(input_file_path, format="mp4")
 
-    def split_audio_into_chunks(self, sound, chunk_length=30*60*1000): # 30 min split
+    def split_audio_into_chunks(self, sound, chunk_length=20*60*1000): # 20 min split
         chunk_files = []
         file_length = len(sound)
 
@@ -92,8 +98,6 @@ class AudioTranscriber:
 
 
 def main():
-    openai.api_key = os.environ["OPENAI_API_KEY"]
-
     parser = argparse.ArgumentParser(description="Transcribe Whisper Audio Files")
     parser.add_argument("input_dir", type=str, help="Input directory")
     parser.add_argument("output_dir", type=str, help="Output directory")
